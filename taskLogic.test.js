@@ -9,6 +9,7 @@ import {
   filterTasks,
   isTaskOverdue,
   normalizeDueDate,
+  sanitizeImportedTasks,
   removeTask,
   toggleTask,
 } from "./taskLogic.js";
@@ -79,6 +80,20 @@ test("isTaskOverdue returns true for overdue active task", () => {
 test("isTaskOverdue returns false for done task", () => {
   const task = { id: "1", title: "A", done: true, dueDate: "2026-01-01" };
   assert.equal(isTaskOverdue(task, "2026-01-02"), false);
+});
+
+test("sanitizeImportedTasks validates and normalizes imported tasks", () => {
+  const imported = sanitizeImportedTasks([
+    { id: "x1", title: "  Задача  ", done: 1, dueDate: "2026-02-01", createdAt: "2026-01-01T00:00:00.000Z" },
+  ]);
+  assert.equal(imported.length, 1);
+  assert.equal(imported[0].title, "Задача");
+  assert.equal(imported[0].done, true);
+  assert.equal(imported[0].dueDate, "2026-02-01");
+});
+
+test("sanitizeImportedTasks throws on invalid payload", () => {
+  assert.throws(() => sanitizeImportedTasks({ bad: true }), /ожидается массив задач/);
 });
 
 test("clearDone keeps only active tasks", () => {

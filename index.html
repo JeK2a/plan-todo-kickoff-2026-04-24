@@ -33,6 +33,13 @@
         <button type="button" data-filter="done" class="filter-button">Выполненные</button>
       </section>
 
+      <section class="io-toolbar">
+        <button id="export-tasks" type="button">Экспорт JSON</button>
+        <label class="import-label" for="import-tasks-file">Импорт JSON</label>
+        <input id="import-tasks-file" type="file" accept="application/json,.json" />
+        <span id="import-error" class="import-error" aria-live="polite"></span>
+      </section>
+
       <ul id="task-list" class="task-list"></ul>
 
       <footer class="footer">

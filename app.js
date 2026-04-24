@@ -6,6 +6,7 @@ import {
   editTaskDueDate,
   filterTasks,
   isTaskOverdue,
+  sanitizeImportedTasks,
   removeTask,
   toggleTask,
 } from "./taskLogic.js";
@@ -19,6 +20,9 @@ const taskList = document.querySelector("#task-list");
 const taskStats = document.querySelector("#task-stats");
 const clearDoneButton = document.querySelector("#clear-done");
 const filterButtons = document.querySelectorAll(".filter-button");
+const exportTasksButton = document.querySelector("#export-tasks");
+const importTasksFileInput = document.querySelector("#import-tasks-file");
+const importErrorElement = document.querySelector("#import-error");
 
 let state = {
   filter: "all",
@@ -44,6 +48,7 @@ function persistTasks() {
 }
 
 function render() {
+  importErrorElement.textContent = "";
   const tasks = filterTasks(state.tasks, state.filter);
   taskList.innerHTML = "";
 
@@ -198,3 +203,38 @@ clearDoneButton.addEventListener("click", () => {
 });
 
 render();
+
+exportTasksButton.addEventListener("click", () => {
+  const payload = JSON.stringify(state.tasks, null, 2);
+  const blob = new Blob([payload], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const datePart = new Date().toISOString().slice(0, 10);
+  link.href = url;
+  link.download = `todo-export-${datePart}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+});
+
+importTasksFileInput.addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    state.tasks = sanitizeImportedTasks(parsed);
+    state.editingTaskId = null;
+    persistTasks();
+    render();
+  } catch (error) {
+    importErrorElement.textContent =
+      error instanceof Error ? error.message : "Ошибка импорта JSON.";
+  } finally {
+    importTasksFileInput.value = "";
+  }
+});

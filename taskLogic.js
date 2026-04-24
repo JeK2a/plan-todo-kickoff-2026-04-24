@@ -72,6 +72,42 @@ export function isTaskOverdue(task, todayDateString = getTodayLocalDateString())
   return task.dueDate < todayDateString;
 }
 
+export function sanitizeImportedTasks(rawTasks) {
+  if (!Array.isArray(rawTasks)) {
+    throw new Error("Неверный формат: ожидается массив задач.");
+  }
+
+  return rawTasks.map((task, index) => {
+    if (!task || typeof task !== "object") {
+      throw new Error(`Неверный формат задачи на позиции ${index + 1}.`);
+    }
+
+    const title = typeof task.title === "string" ? task.title.trim() : "";
+    if (!title) {
+      throw new Error(`Пустой заголовок задачи на позиции ${index + 1}.`);
+    }
+
+    const id =
+      typeof task.id === "string" && task.id.trim()
+        ? task.id
+        : `imported-${index + 1}-${Date.now()}`;
+    const done = Boolean(task.done);
+    const dueDate = normalizeDueDate(task.dueDate ?? null);
+    const createdAt =
+      typeof task.createdAt === "string" && task.createdAt.trim()
+        ? task.createdAt
+        : new Date().toISOString();
+
+    return {
+      id,
+      title,
+      done,
+      dueDate,
+      createdAt,
+    };
+  });
+}
+
 function getTodayLocalDateString() {
   const now = new Date();
   const year = now.getFullYear();
