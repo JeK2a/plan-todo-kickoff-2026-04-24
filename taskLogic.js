@@ -35,6 +35,17 @@ export function removeTask(tasks, id) {
   return tasks.filter((task) => task.id !== id);
 }
 
+export function editTaskTitle(tasks, id, nextTitle) {
+  const normalizedTitle = nextTitle.trim();
+  if (!normalizedTitle) {
+    return tasks;
+  }
+
+  return tasks.map((task) =>
+    task.id === id ? { ...task, title: normalizedTitle } : task,
+  );
+}
+
 export function clearDone(tasks) {
   return tasks.filter((task) => !task.done);
 }

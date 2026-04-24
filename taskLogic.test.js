@@ -4,6 +4,7 @@ import {
   addTask,
   clearDone,
   doneCount,
+  editTaskTitle,
   filterTasks,
   removeTask,
   toggleTask,
@@ -44,6 +45,17 @@ test("removeTask removes only selected task", () => {
   const result = removeTask(sampleTasks, "2");
   assert.equal(result.length, 1);
   assert.equal(result[0].id, "1");
+});
+
+test("editTaskTitle updates title and trims value", () => {
+  const result = editTaskTitle(sampleTasks, "1", "  Обновлено  ");
+  assert.equal(result[0].title, "Обновлено");
+  assert.equal(result[1].title, "B");
+});
+
+test("editTaskTitle does not save empty value", () => {
+  const result = editTaskTitle(sampleTasks, "1", "   ");
+  assert.deepEqual(result, sampleTasks);
 });
 
 test("clearDone keeps only active tasks", () => {

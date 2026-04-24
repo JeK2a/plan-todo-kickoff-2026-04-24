@@ -88,6 +88,14 @@ button:hover {
   flex: 1;
 }
 
+.task-edit-input {
+  flex: 1;
+  border: 1px solid #9ca3af;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
 .task-title.is-done {
   text-decoration: line-through;
   color: #9ca3af;
