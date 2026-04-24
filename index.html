@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO MVP</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>TODO MVP</h1>
+      <p class="subtitle">Первый сквозной пользовательский сценарий</p>
+
+      <form id="task-form" class="task-form">
+        <label for="task-title">Новая задача</label>
+        <div class="task-form-row">
+          <input
+            id="task-title"
+            name="task-title"
+            type="text"
+            placeholder="Например: подготовить acceptance criteria"
+            required
+          />
+          <button type="submit">Добавить</button>
+        </div>
+      </form>
+
+      <section class="toolbar">
+        <span>Фильтр:</span>
+        <button type="button" data-filter="all" class="filter-button is-active">Все</button>
+        <button type="button" data-filter="active" class="filter-button">Активные</button>
+        <button type="button" data-filter="done" class="filter-button">Выполненные</button>
+      </section>
+
+      <ul id="task-list" class="task-list"></ul>
+
+      <footer class="footer">
+        <span id="task-stats">0 задач</span>
+        <button id="clear-done" type="button">Очистить выполненные</button>
+      </footer>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
