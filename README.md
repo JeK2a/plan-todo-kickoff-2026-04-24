@@ -79,3 +79,8 @@
 ### Запуск тестов
 
 - `npm test`
+
+## Статусы задач #1 и #2
+
+- Scope и non-goals зафиксированы в `docs/mvp-scope.md`.
+- Acceptance criteria релиза зафиксированы в `docs/acceptance-criteria-v1.md`.
