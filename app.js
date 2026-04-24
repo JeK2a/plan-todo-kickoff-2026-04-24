@@ -1,3 +1,12 @@
+import {
+  addTask,
+  clearDone,
+  doneCount,
+  filterTasks,
+  removeTask,
+  toggleTask,
+} from "./taskLogic.js";
+
 const STORAGE_KEY = "todo-mvp.tasks";
 
 const form = document.querySelector("#task-form");
@@ -29,18 +38,8 @@ function persistTasks() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tasks));
 }
 
-function visibleTasks() {
-  if (state.filter === "active") {
-    return state.tasks.filter((task) => !task.done);
-  }
-  if (state.filter === "done") {
-    return state.tasks.filter((task) => task.done);
-  }
-  return state.tasks;
-}
-
 function render() {
-  const tasks = visibleTasks();
+  const tasks = filterTasks(state.tasks, state.filter);
   taskList.innerHTML = "";
 
   tasks.forEach((task) => {
@@ -58,9 +57,7 @@ function render() {
     toggle.type = "button";
     toggle.textContent = task.done ? "Вернуть" : "Готово";
     toggle.addEventListener("click", () => {
-      state.tasks = state.tasks.map((itemTask) =>
-        itemTask.id === task.id ? { ...itemTask, done: !itemTask.done } : itemTask,
-      );
+      state.tasks = toggleTask(state.tasks, task.id);
       persistTasks();
       render();
     });
@@ -69,7 +66,7 @@ function render() {
     remove.type = "button";
     remove.textContent = "Удалить";
     remove.addEventListener("click", () => {
-      state.tasks = state.tasks.filter((itemTask) => itemTask.id !== task.id);
+      state.tasks = removeTask(state.tasks, task.id);
       persistTasks();
       render();
     });
@@ -79,8 +76,8 @@ function render() {
     taskList.append(item);
   });
 
-  const doneCount = state.tasks.filter((task) => task.done).length;
-  taskStats.textContent = `${state.tasks.length} задач, выполнено: ${doneCount}`;
+  const doneTasks = doneCount(state.tasks);
+  taskStats.textContent = `${state.tasks.length} задач, выполнено: ${doneTasks}`;
 
   filterButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.filter === state.filter);
@@ -94,15 +91,7 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  state.tasks = [
-    {
-      id: crypto.randomUUID(),
-      title,
-      done: false,
-      createdAt: new Date().toISOString(),
-    },
-    ...state.tasks,
-  ];
+  state.tasks = addTask(state.tasks, title, () => crypto.randomUUID());
   persistTasks();
   form.reset();
   input.focus();
@@ -117,7 +106,7 @@ filterButtons.forEach((button) => {
 });
 
 clearDoneButton.addEventListener("click", () => {
-  state.tasks = state.tasks.filter((task) => !task.done);
+  state.tasks = clearDone(state.tasks);
   persistTasks();
   render();
 });
