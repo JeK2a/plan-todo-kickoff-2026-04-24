@@ -5,7 +5,10 @@ import {
   clearDone,
   doneCount,
   editTaskTitle,
+  editTaskDueDate,
   filterTasks,
+  isTaskOverdue,
+  normalizeDueDate,
   removeTask,
   toggleTask,
 } from "./taskLogic.js";
@@ -28,11 +31,12 @@ test("filterTasks returns done tasks", () => {
 });
 
 test("addTask prepends new normalized task", () => {
-  const result = addTask(sampleTasks, "  Новая задача  ", () => "new-id");
+  const result = addTask(sampleTasks, "  Новая задача  ", () => "new-id", "2026-05-01");
   assert.equal(result.length, 3);
   assert.equal(result[0].id, "new-id");
   assert.equal(result[0].title, "Новая задача");
   assert.equal(result[0].done, false);
+  assert.equal(result[0].dueDate, "2026-05-01");
 });
 
 test("toggleTask flips done flag by id", () => {
@@ -56,6 +60,25 @@ test("editTaskTitle updates title and trims value", () => {
 test("editTaskTitle does not save empty value", () => {
   const result = editTaskTitle(sampleTasks, "1", "   ");
   assert.deepEqual(result, sampleTasks);
+});
+
+test("editTaskDueDate updates due date", () => {
+  const result = editTaskDueDate(sampleTasks, "1", "2026-06-10");
+  assert.equal(result[0].dueDate, "2026-06-10");
+});
+
+test("normalizeDueDate returns null for invalid value", () => {
+  assert.equal(normalizeDueDate("10.06.2026"), null);
+});
+
+test("isTaskOverdue returns true for overdue active task", () => {
+  const task = { id: "1", title: "A", done: false, dueDate: "2026-01-01" };
+  assert.equal(isTaskOverdue(task, "2026-01-02"), true);
+});
+
+test("isTaskOverdue returns false for done task", () => {
+  const task = { id: "1", title: "A", done: true, dueDate: "2026-01-01" };
+  assert.equal(isTaskOverdue(task, "2026-01-02"), false);
 });
 
 test("clearDone keeps only active tasks", () => {

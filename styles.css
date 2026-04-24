@@ -33,7 +33,8 @@ h1 {
   gap: 10px;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="date"] {
   flex: 1;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -88,12 +89,49 @@ button:hover {
   flex: 1;
 }
 
+.task-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.task-due-date {
+  font-variant-numeric: tabular-nums;
+}
+
+.task-overdue {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.task-edit-fields {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
 .task-edit-input {
   flex: 1;
   border: 1px solid #9ca3af;
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 14px;
+}
+
+.task-edit-date-input {
+  max-width: 170px;
 }
 
 .task-title.is-done {

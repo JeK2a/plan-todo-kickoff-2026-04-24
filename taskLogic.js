@@ -8,7 +8,7 @@ export function filterTasks(tasks, filter) {
   return tasks;
 }
 
-export function addTask(tasks, title, idFactory) {
+export function addTask(tasks, title, idFactory, dueDate = null) {
   const normalizedTitle = title.trim();
   if (!normalizedTitle) {
     return tasks;
@@ -19,6 +19,7 @@ export function addTask(tasks, title, idFactory) {
       id: idFactory(),
       title: normalizedTitle,
       done: false,
+      dueDate: normalizeDueDate(dueDate),
       createdAt: new Date().toISOString(),
     },
     ...tasks,
@@ -44,6 +45,39 @@ export function editTaskTitle(tasks, id, nextTitle) {
   return tasks.map((task) =>
     task.id === id ? { ...task, title: normalizedTitle } : task,
   );
+}
+
+export function editTaskDueDate(tasks, id, nextDueDate) {
+  const normalizedDueDate = normalizeDueDate(nextDueDate);
+  return tasks.map((task) =>
+    task.id === id ? { ...task, dueDate: normalizedDueDate } : task,
+  );
+}
+
+export function normalizeDueDate(rawDueDate) {
+  if (!rawDueDate) {
+    return null;
+  }
+  const normalized = rawDueDate.trim();
+  if (!normalized) {
+    return null;
+  }
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
+}
+
+export function isTaskOverdue(task, todayDateString = getTodayLocalDateString()) {
+  if (task.done || !task.dueDate) {
+    return false;
+  }
+  return task.dueDate < todayDateString;
+}
+
+function getTodayLocalDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export function clearDone(tasks) {

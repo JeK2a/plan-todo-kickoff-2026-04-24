@@ -3,7 +3,9 @@ import {
   clearDone,
   doneCount,
   editTaskTitle,
+  editTaskDueDate,
   filterTasks,
+  isTaskOverdue,
   removeTask,
   toggleTask,
 } from "./taskLogic.js";
@@ -12,6 +14,7 @@ const STORAGE_KEY = "todo-mvp.tasks";
 
 const form = document.querySelector("#task-form");
 const input = document.querySelector("#task-title");
+const dueDateInput = document.querySelector("#task-due-date");
 const taskList = document.querySelector("#task-list");
 const taskStats = document.querySelector("#task-stats");
 const clearDoneButton = document.querySelector("#clear-done");
@@ -51,14 +54,35 @@ function render() {
     const title = document.createElement("span");
     title.className = `task-title ${task.done ? "is-done" : ""}`.trim();
     title.textContent = task.title;
+    const meta = document.createElement("div");
+    meta.className = "task-meta";
+    if (task.dueDate) {
+      const dueDateLabel = document.createElement("span");
+      dueDateLabel.className = "task-due-date";
+      dueDateLabel.textContent = `Дедлайн: ${task.dueDate}`;
+      meta.append(dueDateLabel);
+      if (isTaskOverdue(task)) {
+        const overdue = document.createElement("span");
+        overdue.className = "task-overdue";
+        overdue.textContent = "Просрочено";
+        meta.append(overdue);
+      }
+    }
+
     const isEditing = state.editingTaskId === task.id;
     let titleInput;
+    let dueDateEditInput;
     if (isEditing) {
       titleInput = document.createElement("input");
       titleInput.type = "text";
       titleInput.value = task.title;
       titleInput.className = "task-edit-input";
       titleInput.setAttribute("aria-label", "Редактировать задачу");
+      dueDateEditInput = document.createElement("input");
+      dueDateEditInput.type = "date";
+      dueDateEditInput.value = task.dueDate ?? "";
+      dueDateEditInput.className = "task-edit-date-input";
+      dueDateEditInput.setAttribute("aria-label", "Редактировать дедлайн");
       queueMicrotask(() => titleInput.focus());
     }
 
@@ -94,6 +118,7 @@ function render() {
       }
 
       state.tasks = editTaskTitle(state.tasks, task.id, titleInput.value);
+      state.tasks = editTaskDueDate(state.tasks, task.id, dueDateEditInput.value);
       state.editingTaskId = null;
       persistTasks();
       render();
@@ -111,6 +136,7 @@ function render() {
         if (event.key === "Enter") {
           event.preventDefault();
           state.tasks = editTaskTitle(state.tasks, task.id, titleInput.value);
+          state.tasks = editTaskDueDate(state.tasks, task.id, dueDateEditInput.value);
           state.editingTaskId = null;
           persistTasks();
           render();
@@ -121,10 +147,16 @@ function render() {
         }
       });
       actions.append(toggle, edit, cancel, remove);
-      item.append(titleInput, actions);
+      const editFields = document.createElement("div");
+      editFields.className = "task-edit-fields";
+      editFields.append(titleInput, dueDateEditInput);
+      item.append(editFields, actions);
     } else {
       actions.append(toggle, edit, remove);
-      item.append(title, actions);
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "task-content";
+      titleWrap.append(title, meta);
+      item.append(titleWrap, actions);
     }
     taskList.append(item);
   });
@@ -144,7 +176,7 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  state.tasks = addTask(state.tasks, title, () => crypto.randomUUID());
+  state.tasks = addTask(state.tasks, title, () => crypto.randomUUID(), dueDateInput.value);
   persistTasks();
   form.reset();
   input.focus();
